@@ -18,7 +18,10 @@ jobs:
           cache: 'maven'
 
       - name: Verify with Maven
-        run: mvn --batch-mode --update-snapshots package
+        run: |-
+          mvn --batch-mode --update-snapshots package -Pdocker-snapshot \
+              -Djib.to.auth.username=${{ github.actor }} \
+              -Djib.to.auth.password=${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish artifacts
         uses: actions/upload-artifact@v3
