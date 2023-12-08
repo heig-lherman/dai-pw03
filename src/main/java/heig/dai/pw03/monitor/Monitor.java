@@ -9,8 +9,7 @@ public class Monitor {
     static SystemInfo si = new SystemInfo();
     static CentralProcessor processor = si.getHardware().getProcessor();
     static GlobalMemory memory = si.getHardware().getMemory();
-
-    static int BYTES_IN_MB = 1024 * 1024;
+    static double BYTES_IN_MB = 1024 * 1024;
 
     /**
      * Get the CPU usage in percentage
@@ -19,23 +18,29 @@ public class Monitor {
     public static double getCPU() {
         double usage = processor.getSystemCpuLoadBetweenTicks(prevTicks) * 100;
         prevTicks = processor.getSystemCpuLoadTicks();
-        return Math.round(usage * 10.0) / 10.0;
+        return round(usage);
     }
 
     /**
      * Get the RAM usage in MB
      * @return RAM usage in MB
      */
-    public static int getRAM() {
-        return (int) ((memory.getTotal() - memory.getAvailable()) / BYTES_IN_MB);
+    public static double getRAM() {
+        double usage = (double) ((memory.getTotal() - memory.getAvailable()) / BYTES_IN_MB);
+        return round(usage);
     }
 
     /**
      * Get the DSK usage in MB
      * @return DSK usage in MB
      */
-    public static int getDSK() {
+    public static double getDSK() {
         OSFileStore store = si.getOperatingSystem().getFileSystem().getFileStores().get(0);
-        return (int) ((store.getTotalSpace() - store.getUsableSpace()) / BYTES_IN_MB);
+        double value = (double) ((store.getTotalSpace() - store.getUsableSpace()) / BYTES_IN_MB);
+        return round(value);
+    }
+
+    private static double round(double value) {
+        return Math.round(value * 10.0) / 10.0;
     }
 }
