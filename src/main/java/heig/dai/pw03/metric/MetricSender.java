@@ -21,11 +21,8 @@ public class MetricSender implements Runnable {
     public void run() {
         try {
             log.debug("Sending metrics to server");
-            // TODO compute metric
-            var value = (int) (Math.random() * 100);
-            // TODO properly format message
-            String message = "metric{value=%.2d}".formatted(value);
-
+            var value = metric.value();
+            String message = "metric{value=%.2f}".formatted(value);
             byte[] payload = message.getBytes(StandardCharsets.UTF_8);
             DatagramPacket datagram = new DatagramPacket(payload, payload.length, group);
 
