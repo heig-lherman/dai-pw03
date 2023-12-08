@@ -14,7 +14,7 @@ import picocli.CommandLine.ScopeType;
  * Main CLI for the Chess client and server.
  *
  * @author Loïc Herman
- * @author Massimo Steffani
+ * @author Massimo Stefani
  */
 @Command(
         name = "DistributedMonitoring",
