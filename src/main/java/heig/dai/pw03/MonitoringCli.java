@@ -2,6 +2,9 @@ package heig.dai.pw03;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import heig.dai.pw03.command.AggregatorCommand;
+import heig.dai.pw03.command.NodeCommand;
+import heig.dai.pw03.command.ReaderCommand;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -23,6 +26,9 @@ import picocli.CommandLine.ScopeType;
         mixinStandardHelpOptions = true,
         subcommands = {
                 HelpCommand.class,
+                AggregatorCommand.class,
+                NodeCommand.class,
+                ReaderCommand.class
         }
 )
 public class MonitoringCli implements Runnable {
