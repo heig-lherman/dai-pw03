@@ -7,6 +7,8 @@ import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -66,7 +68,7 @@ public class NodeCommand implements Runnable {
         try (var socket = new MulticastSocket(port)) {
             log.info("Emitter started on port {}...", port);
 
-            InetSocketAddress group = new InetSocketAddress(metric.getGroupAddress(), port);
+            InetSocketAddress group = new InetSocketAddress(metric.getGroupAddress(), 6343);
             socket.joinGroup(group, iface);
 
             log.info("Scheduling sending {} metrics to {} on {} every {}s", metric, group, iface, frequency);
@@ -76,12 +78,10 @@ public class NodeCommand implements Runnable {
                     frequency,
                     java.util.concurrent.TimeUnit.SECONDS
             );
-
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             socket.leaveGroup(group, iface);
         } catch (Exception e) {
             log.error("Error while sending metrics", e);
-        } finally {
-            executor.shutdown();
         }
     }
 }
