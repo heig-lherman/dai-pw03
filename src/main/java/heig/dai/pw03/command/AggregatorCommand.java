@@ -1,8 +1,12 @@
 package heig.dai.pw03.command;
 
+import heig.dai.pw03.metric.Metric;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Command to start an aggregator server, which stores monitoring
@@ -28,7 +32,33 @@ public class AggregatorCommand implements Runnable {
 
     @Override
     public void run() {
-//        Socket socket = openSocket(ipAddress, port);
-//        log.info("Connected to server, waiting for game to start...");
+        try (MulticastSocket socket = new MulticastSocket(port)) {
+            for (Metric metric : Metric.values()) {
+                socket.joinGroup(new InetSocketAddress(metric.getGroupAddress(), port), NetworkInterface.getByName("lo"));
+            }
+            byte[] receiveData = new byte[1024];
+
+            while (true) {
+                DatagramPacket packet = new DatagramPacket(
+                        receiveData,
+                        receiveData.length
+                );
+
+                socket.receive(packet);
+
+                String message = new String(
+                        packet.getData(),
+                        packet.getOffset(),
+                        packet.getLength(),
+                        StandardCharsets.UTF_8
+                );
+
+                System.out.println("Multicast receiver received message: " + message);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
