@@ -1,4 +1,5 @@
 package heig.dai.pw03.monitor;
+import heig.dai.pw03.metric.Metric;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
@@ -11,11 +12,19 @@ public class Monitor {
     static GlobalMemory memory = si.getHardware().getMemory();
     static double BYTES_IN_MB = 1024 * 1024;
 
+    public static double valueOf(Metric metric) {
+        return switch (metric) {
+            case CPU -> getCPU();
+            case RAM -> getRAM();
+            case DSK -> getDSK();
+        };
+    }
+
     /**
      * Get the CPU usage in percentage
      * @return CPU usage in percentage
      */
-    public static double getCPU() {
+    private static double getCPU() {
         double usage = processor.getSystemCpuLoadBetweenTicks(prevTicks) * 100;
         prevTicks = processor.getSystemCpuLoadTicks();
         return round(usage);
@@ -25,7 +34,7 @@ public class Monitor {
      * Get the RAM usage in MB
      * @return RAM usage in MB
      */
-    public static double getRAM() {
+    private static double getRAM() {
         double usage = (double) ((memory.getTotal() - memory.getAvailable()) / BYTES_IN_MB);
         return round(usage);
     }
@@ -34,7 +43,7 @@ public class Monitor {
      * Get the DSK usage in MB
      * @return DSK usage in MB
      */
-    public static double getDSK() {
+    private static double getDSK() {
         OSFileStore store = si.getOperatingSystem().getFileSystem().getFileStores().get(0);
         double value = (double) ((store.getTotalSpace() - store.getUsableSpace()) / BYTES_IN_MB);
         return round(value);
