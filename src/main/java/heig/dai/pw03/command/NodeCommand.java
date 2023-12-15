@@ -2,9 +2,8 @@ package heig.dai.pw03.command;
 
 import heig.dai.pw03.metric.Metric;
 import heig.dai.pw03.metric.MetricSender;
-import java.net.InetSocketAddress;
-import java.net.MulticastSocket;
-import java.net.NetworkInterface;
+
+import java.net.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -62,8 +61,21 @@ public class NodeCommand implements Runnable {
     )
     private Metric metric;
 
+    @Option(
+            names = {"-h", "--hostname"},
+            description = "hostname of this node. Default: machine hostname"
+    )
+    private String hostname;
+
     @Override
     public void run() {
+        if (hostname == null) {
+            try {
+                hostname = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
+        }
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         try (var socket = new MulticastSocket(port)) {
             log.info("Emitter started on port {}...", port);
@@ -73,7 +85,7 @@ public class NodeCommand implements Runnable {
 
             log.info("Scheduling sending {} metrics to {} on {} every {}s", metric, group, iface, frequency);
             executor.scheduleAtFixedRate(
-                    new MetricSender(socket, group, metric),
+                    new MetricSender(socket, group, metric, hostname),
                     delay,
                     frequency,
                     java.util.concurrent.TimeUnit.SECONDS

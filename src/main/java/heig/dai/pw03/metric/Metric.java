@@ -16,15 +16,6 @@ public enum Metric {
 
     private final String groupAddr;
 
-    public double value() {
-        return switch (this) {
-            case CPU -> Monitor.getCPU();
-            case RAM -> Monitor.getRAM();
-            case DSK -> Monitor.getDSK();
-            default -> throw new IllegalStateException("Unexpected value: " + this);
-        };
-    }
-
     public InetAddress getGroupAddress() {
         try {
             return InetAddress.getByName(groupAddr);
