@@ -10,6 +10,7 @@ import picocli.CommandLine.Option;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -27,7 +28,7 @@ import java.util.List;
 )
 public class AggregatorCommand implements Runnable {
 
-    private static final List<Emitter> emitters =  new ArrayList<>();
+    private static final HashMap<String, Emitter> emitters =  new HashMap<>();
 
     @Option(
             names = {"-p", "--port"},
@@ -59,13 +60,13 @@ public class AggregatorCommand implements Runnable {
                         StandardCharsets.UTF_8
                 );
                 MetricMessage metricMessage = MetricMessage.from(message);
-                if(!emitters.contains(metricMessage.hostname())) {
-                    emitters.add(new Emitter(metricMessage.hostname()));
+                if (!emitters.containsKey(metricMessage.hostname())) {
+                    emitters.put(metricMessage.hostname(), new Emitter(metricMessage.hostname()));
+                    log.info("New emitter: " + metricMessage.hostname());
                 }
-                System.out.println("Multicast receiver received message: " + message);
+                emitters.get(metricMessage.hostname()).addMetricMessage(metricMessage);
+                log.info("Multicast receiver received message: " + message);
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }
