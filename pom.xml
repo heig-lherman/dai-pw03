@@ -88,7 +88,7 @@
                         <configuration>
                             <archive>
                                 <manifest>
-                                    <mainClass>ch.lutonite.heig.dai.pw03.MonitoringCli</mainClass>
+                                    <mainClass>heig.dai.pw03.MonitoringCli</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

@@ -4,7 +4,21 @@ import lombok.Getter;
 
 import java.util.Locale;
 
-public record MetricMessage(Metric metric, String hostname, double value) {
+/**
+ * Represents a message sent by an emitter.
+ *
+ * @param metric   The metric type
+ * @param hostname The hostname of the emitter
+ * @param value    The value of the metric
+ *
+ * @author Loïc Herman
+ * @author Massimo Stefani
+ */
+public record MetricMessage(
+        Metric metric,
+        String hostname,
+        double value
+) {
 
     public static MetricMessage from(String datagram) {
         String[] parts = datagram.split("\\{|\\}");

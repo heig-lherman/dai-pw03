@@ -60,8 +60,7 @@ public class MonitoringCli implements Runnable {
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
         root.setLevel(
                 switch (verbosity.length) {
-                    case 0 -> Level.WARN;
-                    case 1 -> Level.INFO;
+                    case 0, 1 -> Level.INFO;
                     case 2 -> Level.DEBUG;
                     default -> Level.TRACE;
                 }
