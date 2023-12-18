@@ -28,7 +28,7 @@ import java.util.concurrent.*;
 public class AggregatorCommand implements Runnable {
 
     @Option(
-            names = {"-O", "--metrics-port"},
+            names = {"-P", "--metrics-port"},
             description = "server port for metrics",
             defaultValue = "9378"
     )
