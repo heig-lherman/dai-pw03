@@ -1,17 +1,15 @@
 package heig.dai.pw03.command;
 
-import heig.dai.pw03.emitters.Emitter;
 import heig.dai.pw03.metric.Metric;
-import heig.dai.pw03.metric.MetricMessage;
+import heig.dai.pw03.aggregator.MetricCollector;
+import heig.dai.pw03.aggregator.MetricReceiver;
+import heig.dai.pw03.reader.ReaderHandler;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * Command to start an aggregator server, which stores monitoring
@@ -24,51 +22,67 @@ import java.util.List;
 @Slf4j
 @Command(
         name = "aggregator",
-        description = "Start an aggregator server to receive and store metrics"
+        description = "Start an aggregator server to receive and store metrics",
+        mixinStandardHelpOptions = true
 )
 public class AggregatorCommand implements Runnable {
 
-    private static final HashMap<String, Emitter> emitters =  new HashMap<>();
+    @Option(
+            names = {"-O", "--metrics-port"},
+            description = "server port for metrics",
+            defaultValue = "9378"
+    )
+    private int metricsPort;
 
     @Option(
-            names = {"-p", "--port"},
-            description = "server port",
+            names = {"-p", "--server-port"},
+            description = "server port for request",
             defaultValue = "6343"
     )
-    private int port;
+    private int serverPort;
+
+    @Option(
+            names = {"-i", "--iface", "--interface"},
+            description = "interface to use for metrics collection",
+            defaultValue = "eth0"
+    )
+    private NetworkInterface iface;
 
     @Override
     public void run() {
-        try (MulticastSocket socket = new MulticastSocket(port)) {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        try (
+                MulticastSocket metricsSocket = new MulticastSocket(metricsPort);
+                DatagramSocket serverSocket = new DatagramSocket(serverPort);
+        ) {
+            String myself = InetAddress.getLocalHost().getHostAddress();
+            log.info("Reader server started ({}:{})", myself, serverPort);
+
+            // join each metric multicast group
             for (Metric metric : Metric.values()) {
-                socket.joinGroup(new InetSocketAddress(metric.getGroupAddress(), port), NetworkInterface.getByName("lo"));
-            }
-            byte[] receiveData = new byte[1024];
-
-            while (true) {
-                DatagramPacket packet = new DatagramPacket(
-                        receiveData,
-                        receiveData.length
+                log.info(
+                        "Joining multicast group for metric {} on {}:{}",
+                        metric,
+                        metric.getGroupAddress(),
+                        metricsPort
                 );
 
-                socket.receive(packet);
-
-                String message = new String(
-                        packet.getData(),
-                        packet.getOffset(),
-                        packet.getLength(),
-                        StandardCharsets.UTF_8
+                metricsSocket.joinGroup(
+                        new InetSocketAddress(metric.getGroupAddress(), metricsPort),
+                        iface
                 );
-                MetricMessage metricMessage = MetricMessage.from(message);
-                if (!emitters.containsKey(metricMessage.hostname())) {
-                    emitters.put(metricMessage.hostname(), new Emitter(metricMessage.hostname()));
-                    log.info("New emitter: " + metricMessage.hostname());
-                }
-                emitters.get(metricMessage.hostname()).addMetricMessage(metricMessage);
-                log.info("Multicast receiver received message: " + message);
             }
+
+            // init metric collector
+            MetricCollector metricCollector = new MetricCollector();
+
+            // start collection threads
+            executor.submit(new MetricReceiver(metricsSocket, metricCollector));
+            executor.submit(new ReaderHandler(serverSocket, metricCollector));
+
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error while receiving metrics", e);
         }
     }
 }

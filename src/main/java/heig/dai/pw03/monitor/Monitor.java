@@ -1,18 +1,29 @@
 package heig.dai.pw03.monitor;
 import heig.dai.pw03.metric.Metric;
+import lombok.experimental.UtilityClass;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 import oshi.software.os.OSFileStore;
 
-public class Monitor {
-    static long[] prevTicks = new long[CentralProcessor.TickType.values().length];
-    static SystemInfo si = new SystemInfo();
-    static CentralProcessor processor = si.getHardware().getProcessor();
-    static GlobalMemory memory = si.getHardware().getMemory();
-    static double BYTES_IN_MB = 1024 * 1024;
+/**
+ * Utility class that can fetch the metrics from the system
+ *
+ * @author Loïc Herman
+ * @author Massimo Stefani
+ */
+@UtilityClass
+public final class Monitor {
 
-    public static double valueOf(Metric metric) {
+    private static final double BYTES_IN_MB = 1024 * 1024;
+
+    private static final SystemInfo si = new SystemInfo();
+    private static final CentralProcessor processor = si.getHardware().getProcessor();
+    private static final GlobalMemory memory = si.getHardware().getMemory();
+
+    private static long[] prevTicks = new long[CentralProcessor.TickType.values().length];
+
+    public static double getMetricValue(Metric metric) {
         return switch (metric) {
             case CPU -> getCPU();
             case RAM -> getRAM();
@@ -35,7 +46,7 @@ public class Monitor {
      * @return RAM usage in MB
      */
     private static double getRAM() {
-        double usage = (double) ((memory.getTotal() - memory.getAvailable()) / BYTES_IN_MB);
+        double usage = (memory.getTotal() - memory.getAvailable()) / BYTES_IN_MB;
         return round(usage);
     }
 
@@ -45,7 +56,7 @@ public class Monitor {
      */
     private static double getDSK() {
         OSFileStore store = si.getOperatingSystem().getFileSystem().getFileStores().get(0);
-        double value = (double) ((store.getTotalSpace() - store.getUsableSpace()) / BYTES_IN_MB);
+        double value = (store.getTotalSpace() - store.getUsableSpace()) / BYTES_IN_MB;
         return round(value);
     }
 

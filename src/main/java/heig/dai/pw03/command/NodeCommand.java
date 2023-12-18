@@ -22,7 +22,8 @@ import picocli.CommandLine.Option;
 @Slf4j
 @Command(
         name = "node",
-        description = "Start a node unit to send metrics"
+        description = "Start a node unit to send metrics",
+        mixinStandardHelpOptions = true
 )
 public class NodeCommand implements Runnable {
 
@@ -62,25 +63,18 @@ public class NodeCommand implements Runnable {
     private Metric metric;
 
     @Option(
-            names = {"-h", "--hostname"},
+            names = {"-H", "--hostname"},
             description = "hostname of this node. Default: machine hostname"
     )
-    private String hostname;
+    private String hostname = getHostname();
 
     @Override
     public void run() {
-        if (hostname == null) {
-            try {
-                hostname = InetAddress.getLocalHost().getHostName();
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
-        }
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        try (var socket = new MulticastSocket(port)) {
+        try (MulticastSocket socket = new MulticastSocket(port)) {
             log.info("Emitter started on port {}...", port);
 
-            InetSocketAddress group = new InetSocketAddress(metric.getGroupAddress(), 6343);
+            InetSocketAddress group = new InetSocketAddress(metric.getGroupAddress(), port);
             socket.joinGroup(group, iface);
 
             log.info("Scheduling sending {} metrics to {} on {} every {}s", metric, group, iface, frequency);
@@ -88,12 +82,21 @@ public class NodeCommand implements Runnable {
                     new MetricSender(socket, group, metric, hostname),
                     delay,
                     frequency,
-                    java.util.concurrent.TimeUnit.SECONDS
+                    TimeUnit.SECONDS
             );
+
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             socket.leaveGroup(group, iface);
         } catch (Exception e) {
             log.error("Error while sending metrics", e);
+        }
+    }
+
+    private static String getHostname() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -1,0 +1,38 @@
+services:
+  cpu-emitter-1:
+    image: ghcr.io/heig-lherman/dai-pw03:dev
+    command:
+      - node
+      - -m
+      - CPU
+  cpu-emitter-2:
+    image: ghcr.io/heig-lherman/dai-pw03:dev
+    command:
+      - node
+      - -m
+      - CPU
+      - -H
+      - cpu-emitter-2
+  ram-emitter-1:
+    image: ghcr.io/heig-lherman/dai-pw03:dev
+    command:
+      - node
+      - -m
+      - RAM
+  dsk-emitter-2:
+    image: ghcr.io/heig-lherman/dai-pw03:dev
+    command:
+      - node
+      - -m
+      - DSK
+  aggregator:
+    image: ghcr.io/heig-lherman/dai-pw03:dev
+    command:
+      - aggregator
+    ports:
+      - 6343:6343/udp
+    depends_on:
+      - cpu-emitter-1
+      - cpu-emitter-2
+      - ram-emitter-1
+      - dsk-emitter-2

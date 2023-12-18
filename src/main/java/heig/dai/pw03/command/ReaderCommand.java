@@ -1,8 +1,17 @@
 package heig.dai.pw03.command;
 
+import heig.dai.pw03.reader.ReaderMessage;
+import heig.dai.pw03.reader.ReaderRequest;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
+
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLOutput;
+import java.util.Scanner;
 
 /**
  * Command to start a reader client, which allows to request
@@ -14,7 +23,8 @@ import picocli.CommandLine.Option;
 @Slf4j
 @Command(
         name = "reader",
-        description = "Start a reader client to fetch metrics"
+        description = "Start a reader client to fetch metrics",
+        mixinStandardHelpOptions = true
 )
 public class ReaderCommand implements Runnable {
 
@@ -23,7 +33,7 @@ public class ReaderCommand implements Runnable {
             description = "server host IP address",
             defaultValue = "127.0.0.1"
     )
-    private String ipAddress;
+    private InetAddress ipAddress;
 
     @Option(
             names = {"-p", "--port"},
@@ -34,7 +44,54 @@ public class ReaderCommand implements Runnable {
 
     @Override
     public void run() {
-//        Socket socket = openSocket(ipAddress, port);
-//        log.info("Connected to server, waiting for game to start...");
+        try (
+                DatagramSocket socket = new DatagramSocket();
+                Scanner scanner = new Scanner(System.in);
+        ) {
+            System.out.println("Welcome to the reader client");
+
+            while (true) {
+                ReaderMessage message = pollMessage(scanner);
+
+                byte[] payload = message.toString().getBytes(StandardCharsets.UTF_8);
+                DatagramPacket datagram = new DatagramPacket(payload, payload.length, ipAddress, port);
+
+                socket.send(datagram);
+
+                byte[] receiveData = new byte[1024];
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                socket.receive(receivePacket);
+
+                String response = new String(receivePacket.getData(), StandardCharsets.UTF_8);
+                System.out.println("-".repeat(50));
+                System.out.printf("Response: %s%n", response);
+                System.out.println("-".repeat(50));
+            }
+        } catch (Exception e) {
+            log.error("Error while running reader", e);
+        }
+    }
+
+    public ReaderMessage pollMessage(Scanner scanner) {
+        while (true) {
+            System.out.println("Please choose an option:\n1. Get known emitters\n2. Get metrics from emitter\n3. Exit");
+            System.out.print("> ");
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    return new ReaderMessage(ReaderRequest.GET_EMITTERS);
+                case 2:
+                    System.out.println("Enter the hostname of the emitter:");
+                    System.out.print("> ");
+                    String emitter = scanner.next();
+
+                    return new ReaderMessage(ReaderRequest.GET_EMITTER, emitter);
+                case 3:
+                    System.exit(0);
+                default:
+                    log.error("Invalid choice");
+            }
+        }
     }
 }
