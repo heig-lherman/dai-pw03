@@ -39,51 +39,63 @@ java -jar target/pw-distributed-monitoring-1.0.0-SNAPSHOT.jar --help
 ### Usage
 * ```aggregator``` : Starts the aggregator
 ```text
-Usage: DistributedMonitoring aggregator [-v] [-i=<iface>] [-p=<port>]
+Usage: DistributedMonitoring aggregator [-hVv] [-i=<iface>] [-O=<metricsPort>]
+                                        [-p=<serverPort>]
 Start an aggregator server to receive and store metrics
+  -h, --help      Show this help message and exit.
   -i, --iface, --interface=<iface>
-                      interface to use
-  -p, --port=<port>   server port
-  -v                  Change log verbosity. Use -vvv for maximum verbosity.
+                  interface to use for metrics collection
+  -O, --metrics-port=<metricsPort>
+                  server port for metrics
+  -p, --server-port=<serverPort>
+                  server port for request
+  -v              Change log verbosity. Use -vvv for maximum verbosity.
+  -V, --version   Print version information and exit.
 ```
 
 * ```node``` : Starts a node that sends metrics to the aggregator
 ```text
-Usage: DistributedMonitoring node [-v] [--delay=<delay>]
-                                  [--frequency=<frequency>] [-h=<hostname>]
+Usage: DistributedMonitoring node [-hVv] [--delay=<delay>]
+                                  [--frequency=<frequency>] [-H=<hostname>]
                                   [-i=<iface>] -m=<metric> [-p=<port>]
-                                  [-sp=<serverPort>]
 Start a node unit to send metrics
       --delay=<delay>     delay before sending metrics in seconds
       --frequency=<frequency>
                           frequency of metrics sending in seconds
-  -h, --hostname=<hostname>
+  -h, --help              Show this help message and exit.
+  -H, --hostname=<hostname>
                           hostname of this node. Default: machine hostname
   -i, --iface, --interface=<iface>
                           interface to use
   -m, --metric=<metric>   metric to send
-  -p, --port=<port>       the port to use
-      -sp, --server-port=<serverPort>
-                          server port
+  -p, --port=<port>       server port
   -v                      Change log verbosity. Use -vvv for maximum verbosity.
+  -V, --version           Print version information and exit.
 ```
 
 * ```reader``` : Starts a reader that reads metrics from the aggregator
 ```text
+Usage: DistributedMonitoring reader [-hVv] [-H=<ipAddress>] [-p=<port>]
+Start a reader client to fetch metrics
+  -h, --help               Show this help message and exit.
+  -H, --host=<ipAddress>   server host IP address
+  -p, --port=<port>        server port
+  -v                       Change log verbosity. Use -vvv for maximum verbosity.
+  -V, --version            Print version information and exit.
 ```
 
 ## Concept summary
 
 ```mermaid
 flowchart LR
-    P1C[PC1:CPU] --> C
-    P2C[PC2:CPU] --> C
-    P2M[PC2:RAM] --> C
-    P3D[PC3:DSK] --> C
-    C{Aggregator}
-    C <--> R1[Reader 1]
-    C <--> R2[Reader N]
-    style C stroke:orange 
+  P1C[PC1:CPU] --> C
+  P2C[PC2:CPU] --> C
+  P2M[PC2:RAM] --> C
+  P3D[PC3:DSK] --> C
+  C{Aggregator}
+  C <--> R1[Reader 1]
+  C <--> R2[Reader N]
+  style C stroke:orange 
 ```
 
 ## Protocol
@@ -93,7 +105,7 @@ flowchart LR
 
 ### Node -> Aggregator
 
-For this part of our architecture, we have decided to use a UDP-type protocol using the fire-and-forget communication 
+For this part of our architecture, we have decided to use a UDP-type protocol using the fire-and-forget communication
 method. We chose to do multicast so that the aggregator can receive data from all the nodes at the same time.
 
 #### Multicast Addresses
@@ -108,24 +120,24 @@ We have decided to use the following multicast addresses for the different types
 * ```<type>{value=<value>, host=<host>}```
   * ```<type>``` : Type of the data sent (cpu, ram, dsk)
   * ```<value>``` : Value of the sent data
-      * cpu : CPU consumption in percentage
-      * ram : RAM consumption in MB
-      * dsk : Disk consumption in MB
+    * cpu : CPU consumption in percentage
+    * ram : RAM consumption in MB
+    * dsk : Disk consumption in MB
   * ```<host>``` : Name of the machine sending the data (hostname). Must be unique for each machine.
 
 #### Messages examples
 ```mermaid
 sequenceDiagram
-    participant Node_1 as Node_1
-    participant Aggregator as Aggregator
-    participant Node_2 as Node_2
-    par
+  participant Node_1 as Node_1
+  participant Aggregator as Aggregator
+  participant Node_2 as Node_2
+  par
     Node_1 ->> Aggregator: cpu{value=30.00, host=Node_1}
     Node_1 ->> Aggregator: ram{value=10000.00, host=Node_1}
-    end
-    par
+  end
+  par
     Node_2 ->> Aggregator : dsk{value=10000.00, host=Node_2}
-    end
+  end
 ```
 
 ### Reader <-> Aggregator
