@@ -37,7 +37,7 @@ public class NodeCommand implements Runnable {
     @Option(
             names = {"-i", "--iface", "--interface"},
             description = "interface to use",
-            defaultValue = "lo"
+            defaultValue = "eth0"
     )
     private NetworkInterface iface;
 
