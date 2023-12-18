@@ -113,6 +113,21 @@ We have decided to use the following multicast addresses for the different types
       * dsk : Disk consumption in MB
   * ```<host>``` : Name of the machine sending the data (hostname). Must be unique for each machine.
 
+#### Messages examples
+```mermaid
+sequenceDiagram
+    participant Node_1 as Node_1
+    participant Aggregator as Aggregator
+    participant Node_2 as Node_2
+    par
+    Node_1 ->> Aggregator: cpu{value=30.00, host=Node_1}
+    Node_1 ->> Aggregator: ram{value=10000.00, host=Node_1}
+    end
+    par
+    Node_2 ->> Aggregator : dsk{value=10000.00, host=Node_2}
+    end
+```
+
 ### Reader <-> Aggregator
 In this part of the architecture, we have decided to use a UDP-type protocol in Unicast mode and using the request-response
 communication method. We chose to do unicast so that the reader can receive specific data from the aggregator.
