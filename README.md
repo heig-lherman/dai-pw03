@@ -217,6 +217,23 @@ communication method. We chose to do unicast so that the reader can receive spec
 #### Messages examples
 ```mermaid
 sequenceDiagram
+    participant Aggregator as Aggregator
+    participant Reader as Reader
+    par
+        Reader ->> Aggregator: GET_EMITTERS
+        Aggregator ->> Reader: [Node_1, Node_2]
+        Reader ->> Aggregator: GET_EMITTER Node_1
+        Aggregator ->> Reader: [cpu: 30.00, ram: 10000.00]
+        Reader ->> Aggregator: HOLA
+        Aggregator ->> Reader: ERROR 1
+        Reader ->> Aggregator: GET_EMITTER Node_3
+        Aggregator ->> Reader: []
+    end
+```
+#### Messages examples
+###### MDSMP (Multicast Distributed Server Monitoring Protocol) and UDSMP (Unicast Distributed Server Monitoring Protocol) working together
+```mermaid
+sequenceDiagram
     participant Node_1 as Node_1
     participant Node_2 as Node_2
     participant Aggregator as Aggregator
