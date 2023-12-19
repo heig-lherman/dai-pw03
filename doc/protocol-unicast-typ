@@ -38,12 +38,12 @@ compatibility across diverse systems and prevents data corruption during transmi
 
 === Sending data
 
-==== From reader to aggregator
+=== From reader to aggregator
 + ```GET_EMITTERS``` : Request to get the list of emitters
 + ```GET_EMITTER <emitter>``` : Request to get the values of a specific emitter
   + ```<emitter>``` : Hostname of the emitter to get the values from
 
-==== From aggregator to reader
+=== From aggregator to reader
 
 + ```[<emitter>, ...]``` : List of emitters. Empty if there is no emitter.
   + ```<emitter>``` : Hostname of the emitter
