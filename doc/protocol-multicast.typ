@@ -13,7 +13,7 @@
 
 #set heading(numbering: "1.1.1")
 
-= Multicast Distributed System Monitoring Protocol - Multicast
+= Multicast Distributed System Monitoring Protocol
 
 == Overview
 
