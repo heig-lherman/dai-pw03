@@ -1,5 +1,17 @@
 # Practical Work 3 - Distributed System Monitoring
 
+```mermaid
+flowchart LR
+    P1C[PC1:CPU] --> C
+    P2C[PC2:CPU] --> C
+    P2M[PC2:RAM] --> C
+    P3D[PC3:DSK] --> C
+    C{Aggregator}
+    C <--> R1[Reader 1]
+    C <--> R2[Reader N]
+    style C stroke:orange 
+```
+
 ## Dependencies
 
 ### Lombok
@@ -131,20 +143,6 @@ Start a reader client to fetch metrics
   -p, --port=<port>        server port
   -v                       Change log verbosity. Use -vvv for maximum verbosity.
   -V, --version            Print version information and exit.
-```
-
-## Concept summary
-
-```mermaid
-flowchart LR
-    P1C[PC1:CPU] --> C
-    P2C[PC2:CPU] --> C
-    P2M[PC2:RAM] --> C
-    P3D[PC3:DSK] --> C
-    C{Aggregator}
-    C <--> R1[Reader 1]
-    C <--> R2[Reader N]
-    style C stroke:orange 
 ```
 
 ## Protocol
