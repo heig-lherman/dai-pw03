@@ -6,6 +6,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
@@ -83,23 +84,28 @@ public class ReaderCommand implements Runnable {
      */
     public ReaderMessage pollMessage(Scanner scanner) {
         while (true) {
-            System.out.println("Please choose an option:\n1. Get known emitters\n2. Get metrics from emitter\n3. Exit");
-            System.out.print("> ");
-            int choice = scanner.nextInt();
+            try {
+                System.out.println("Please choose an option:\n1. Get known emitters\n2. Get metrics from emitter\n3. Exit");
+                System.out.print("> ");
+                int choice = scanner.nextInt();
 
-            switch (choice) {
-                case 1:
-                    return new ReaderMessage(ReaderRequest.GET_EMITTERS);
-                case 2:
-                    System.out.println("Enter the hostname of the emitter:");
-                    System.out.print("> ");
-                    String emitter = scanner.next();
+                switch (choice) {
+                    case 1:
+                        return new ReaderMessage(ReaderRequest.GET_EMITTERS);
+                    case 2:
+                        System.out.println("Enter the hostname of the emitter:");
+                        System.out.print("> ");
+                        String emitter = scanner.next();
 
-                    return new ReaderMessage(ReaderRequest.GET_EMITTER, emitter);
-                case 3:
-                    System.exit(0);
-                default:
-                    log.error("Invalid choice");
+                        return new ReaderMessage(ReaderRequest.GET_EMITTER, emitter);
+                    case 3:
+                        System.exit(0);
+                    default:
+                        log.error("Invalid choice");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input, please try again");
+                scanner.next();
             }
         }
     }
