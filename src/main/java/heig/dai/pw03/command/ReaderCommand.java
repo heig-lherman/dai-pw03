@@ -2,16 +2,14 @@ package heig.dai.pw03.command;
 
 import heig.dai.pw03.reader.ReaderMessage;
 import heig.dai.pw03.reader.ReaderRequest;
-import lombok.extern.slf4j.Slf4j;
-import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLOutput;
 import java.util.Scanner;
+import lombok.extern.slf4j.Slf4j;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
 
 /**
  * Command to start a reader client, which allows to request
@@ -62,7 +60,13 @@ public class ReaderCommand implements Runnable {
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                 socket.receive(receivePacket);
 
-                String response = new String(receivePacket.getData(), StandardCharsets.UTF_8);
+                String response = new String(
+                        receivePacket.getData(),
+                        receivePacket.getOffset(),
+                        receivePacket.getLength(),
+                        StandardCharsets.UTF_8
+                );
+
                 System.out.println("-".repeat(50));
                 System.out.printf("Response: %s%n", response);
                 System.out.println("-".repeat(50));
