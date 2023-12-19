@@ -22,6 +22,11 @@ public final class MetricList extends LinkedList<MetricMessage> {
         this.maxSize = maxSize;
     }
 
+    /**
+     * Add a metric message to the list. If the list is full, the oldest message is removed.
+     * @param metricMessage The metric message to add
+     * @return true as per Collection.add
+     */
     @Override
     public boolean add(MetricMessage metricMessage) {
         if (size() >= maxSize) {
