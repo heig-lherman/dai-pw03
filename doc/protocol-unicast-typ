@@ -60,5 +60,3 @@ compatibility across diverse systems and prevents data corruption during transmi
 == Examples
 
 #image("protocol-unicast.svg")
-
-
