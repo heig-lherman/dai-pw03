@@ -5,6 +5,7 @@ import heig.dai.pw03.reader.ReaderRequest;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -49,6 +50,8 @@ public class ReaderCommand implements Runnable {
         ) {
             System.out.println("Welcome to the reader client");
 
+            socket.setSoTimeout(1000);
+
             while (true) {
                 ReaderMessage message = pollMessage(scanner);
 
@@ -59,7 +62,13 @@ public class ReaderCommand implements Runnable {
 
                 byte[] receiveData = new byte[1024];
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-                socket.receive(receivePacket);
+
+                try {
+                    socket.receive(receivePacket);
+                } catch (SocketTimeoutException e) {
+                    System.out.println("No response from server, please try again in a few moments...");
+                    continue;
+                }
 
                 String response = new String(
                         receivePacket.getData(),
