@@ -180,11 +180,11 @@ sequenceDiagram
     participant Aggregator as Aggregator
     participant Node_2 as Node_2
     par
-    Node_1 ->> Aggregator: cpu{value=30.00, host=Node_1}
-    Node_1 ->> Aggregator: ram{value=10000.00, host=Node_1}
+        Node_1 ->> Aggregator: cpu{value=30.00, host=Node_1}
+        Node_1 ->> Aggregator: ram{value=10000.00, host=Node_1}
     end
     par
-    Node_2 ->> Aggregator : dsk{value=10000.00, host=Node_2}
+        Node_2 ->> Aggregator : dsk{value=10000.00, host=Node_2}
     end
 ```
 
@@ -201,7 +201,41 @@ communication method. We chose to do unicast so that the reader can receive spec
 
 ##### From aggregator to reader
 
-* ```ERROR 1``` : If the request could not be parsed by the aggregator
-* ```[<metric>: <value>, ...]``` : List of values for the requested emitter
+* ```[<emitter>, ...]``` : List of emitters. Empty if there is no emitter.
+  * ```<emitter>``` : Hostname of the emitter
+* ```[<metric>: <value>, ...]``` : List of values for the requested emitter. The list limit is 10 values and can be empty if the emitter does not exist.
   * ```<metric>``` : Type of the data sent (CPU, RAM, DSK)
   * ```<value>``` : Value of the sent data
+    * cpu : CPU consumption in percentage
+    * ram : RAM consumption in MB
+    * dsk : Disk consumption in MB
+* ```ERROR <ErrorNum>``` : Send an error to the reader
+  * ```<ErrorNum>``` : Error number
+    * ```1``` : The message could not be parsed
+
+
+#### Messages examples
+```mermaid
+sequenceDiagram
+    participant Node_1 as Node_1
+    participant Node_2 as Node_2
+    participant Aggregator as Aggregator
+    participant Reader as Reader
+    par
+        Node_1 ->> Aggregator: cpu{value=30.00, host=Node_1}
+        Node_1 ->> Aggregator: ram{value=10000.00, host=Node_1}
+    end
+    par
+        Node_2 ->> Aggregator : dsk{value=10000.00, host=Node_2}
+    end
+    par
+        Reader ->> Aggregator: GET_EMITTERS
+        Aggregator ->> Reader: [Node_1, Node_2]
+        Reader ->> Aggregator: GET_EMITTER Node_1
+        Aggregator ->> Reader: [cpu: 30.00, ram: 10000.00]
+        Reader ->> Aggregator: HOLA
+        Aggregator ->> Reader: ERROR 1
+        Reader ->> Aggregator: GET_EMITTER Node_3
+        Aggregator ->> Reader: []
+    end
+```
