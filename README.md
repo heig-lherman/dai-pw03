@@ -83,7 +83,7 @@ java -jar target/pw-distributed-monitoring-1.0.0-SNAPSHOT.jar --help
 
 Giving
   
-```shell
+```text
 Usage: DistributedMonitoring [-hVv] [COMMAND]
 Aggregate monitoring data from multiple sources.
   -h, --help      Show this help message and exit.
