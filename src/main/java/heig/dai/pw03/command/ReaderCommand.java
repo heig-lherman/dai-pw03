@@ -72,6 +72,11 @@ public class ReaderCommand implements Runnable {
         }
     }
 
+    /**
+     * Polls the user for a message to send to the server.
+     * @param scanner the scanner to use
+     * @return the message to send
+     */
     public ReaderMessage pollMessage(Scanner scanner) {
         while (true) {
             System.out.println("Please choose an option:\n1. Get known emitters\n2. Get metrics from emitter\n3. Exit");
