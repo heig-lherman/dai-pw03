@@ -13,28 +13,31 @@
 
 #set heading(numbering: "1.1.1")
 
-= Distributed System Monitoring Protocol - Multicast
+= Multicast Distributed System Monitoring Protocol - Multicast
 
 == Overview
 
-The Distributed System Monitoring Protocol (DSMP) is a protocol that allows a system to send metrics to a monitoring server.
-The protocol is based on a multicast UDP connection, meaning that the server will listen to a specific multicast address
-and port, and the clients will send their metrics to this address and port.
+The Multicast Distributed System Monitoring Protocol (MDSMP) serves as a crucial tool for efficiently transmitting
+and collecting system metrics in distributed environments. Designed to streamline the process of monitoring,
+MDSMP enables systems to send metrics data to a central monitoring server. This protocol is especially well-suited for
+scenarios where real-time insights into system performance are essential.
 
 == Protocol
 
-The DSMP protocol uses text-based messages over UDP. The messages are send conforming the prometheus metrics format.
-The format is described in the following link: https://prometheus.io/docs/concepts/data_model/
+MDSMP employs text-based messages following the Prometheus metrics format, as described in the Prometheus documentation
+(https://prometheus.io/docs/concepts/data_model/). This standardization ensures compatibility with Prometheus-based
+monitoring and facilitates easy integration into existing monitoring ecosystems.
 
-Seen that the protocol is based on UDP, a connection is not established between the client and the server, meaning that the server
-will not send any response to the client. The server will only listen to the multicast address and port. The used port is 6343.
+Since MDSMP is based on UDP, it operates without establishing a formal connection between clients and the server.
+This results in a lightweight and efficient communication model, reducing overhead and latency. The port used is 9378.
 
 Multicast addresses groups:
 cpu : 230.0.0.1
 ram : 230.0.0.2
 dsk : 230.0.0.3
 
-All messages are case sensitive and must be sent using UTF-8 encoding.
+All messages exchanged within the MDSMP protocol must be encoded in UTF-8. This standardized encoding scheme ensures
+compatibility across diverse systems and prevents data corruption during transmission.
 
 == Messages
 
@@ -51,5 +54,3 @@ All messages are case sensitive and must be sent using UTF-8 encoding.
 == Examples
 
 #image("protocol-multicast.svg")
-
-
