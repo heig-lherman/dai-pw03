@@ -55,4 +55,4 @@ All messages exchanged within the MDSMP protocol must be encoded in UTF-8. This 
 
 The next figure contains an example of two nodes sending data to the aggregator. Since the messages are sent using the fire-and-forget method messages are sent without expecting anything in return, the messages can also be sent in parallel.
 
-#image("protocol-multicast.svg")
+#image("protocol-multicast.png")

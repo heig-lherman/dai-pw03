@@ -66,5 +66,5 @@ Clients must send the first request to which the server might answer, it is reco
 The next figure contains an example of a couple readers that may be sending messages in parallel to the server. The server will then respond to each reader with the requested information. 
 
 #align(center)[
-  #image("protocol-unicast.svg", width: 50%)
+  #image("protocol-unicast.png", width: 50%)
 ]
