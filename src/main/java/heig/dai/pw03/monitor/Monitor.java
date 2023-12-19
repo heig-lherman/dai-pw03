@@ -23,6 +23,11 @@ public final class Monitor {
 
     private static long[] prevTicks = new long[CentralProcessor.TickType.values().length];
 
+    /**
+     * Get the value of a metric from the system (CPU, RAM or DSK)
+     * @param metric The metric to get
+     * @return The value of the metric
+     */
     public static double getMetricValue(Metric metric) {
         return switch (metric) {
             case CPU -> getCPU();
