@@ -14,10 +14,19 @@ public record ReaderMessage(
         String hostname
 ) {
 
+    /**
+     * Create a new reader message from a request and an optional hostname.
+     * @param request The request
+     */
     public ReaderMessage(ReaderRequest request) {
         this(request, null);
     }
 
+    /**
+     * Create a new reader message from a datagram. The datagram must be in the format: "request hostname".
+     * @param datagram The datagram to parse
+     * @return The reader message
+     */
     public static ReaderMessage from(String datagram) {
         try {
             String[] parts = datagram.split("\s", 2);
@@ -31,6 +40,10 @@ public record ReaderMessage(
         }
     }
 
+    /**
+     * Get the reader message as a string. The string is in the format: "request hostname".
+     * @return The reader message as a string
+     */
     @Override
     public String toString() {
         return "%s %s".formatted(
