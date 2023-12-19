@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+<configuration default="false" name="emitter #5 [start]" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="heig.dai.pw03.MonitoringCli" />
+    <module name="pw-distributed-monitoring" />
+    <option name="PROGRAM_PARAMETERS" value="node -m CPU -H pc-2 -v" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
