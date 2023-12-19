@@ -1,12 +1,12 @@
 services:
   cpu-emitter-1:
-    image: ghcr.io/heig-lherman/dai-pw03:dev
+    image: ghcr.io/heig-lherman/dai-pw03
     command:
       - node
       - -m
       - CPU
   cpu-emitter-2:
-    image: ghcr.io/heig-lherman/dai-pw03:dev
+    image: ghcr.io/heig-lherman/dai-pw03
     command:
       - node
       - -m
@@ -14,19 +14,19 @@ services:
       - -H
       - cpu-emitter-2
   ram-emitter-1:
-    image: ghcr.io/heig-lherman/dai-pw03:dev
+    image: ghcr.io/heig-lherman/dai-pw03
     command:
       - node
       - -m
       - RAM
   dsk-emitter-2:
-    image: ghcr.io/heig-lherman/dai-pw03:dev
+    image: ghcr.io/heig-lherman/dai-pw03
     command:
       - node
       - -m
       - DSK
   aggregator:
-    image: ghcr.io/heig-lherman/dai-pw03:dev
+    image: ghcr.io/heig-lherman/dai-pw03
     command:
       - aggregator
     ports:

@@ -12,15 +12,48 @@ Maven will compile the project without any additional configuration.
 This project uses [Oshi](https://github.com/oshi/oshi) to get system information.
 Oshi is a cross-platform library that provides information about the hardware and software of the system.
 
-## Build the JAR
+## Building and running with Docker
 
-To build the JAR, run the following command from the root of the repository:
+Pre-built images are built using [Google Jib](https://github.com/GoogleContainerTools/jib) efficiently for each
+commit on the `main` branch.
+These images are available with the `dev` tag on the
+[packages of this repository](https://github.com/heig-lherman/dai-pw03/pkgs/container/dai-pw03)
+
+If one wants to build the images locally, the following command can be used that uses a multi-stage build to build the
+JAR and then build the image:
+
+```shell
+docker build -t dai-pw03:dev .
+```
+
+Using Docker compose, a set of nodes and an aggregator can easily be started:
+
+```shell
+docker-compose up
+```
+
+This will start 4 nodes and 1 aggregator with the 6343 port open for UDP, one can then use either the image
+or a locally built JAR to start a reader:
+
+```shell
+docker run --rm -it ghcr.io/heig-lherman/dai-pw03 reader -H <aggregator-ip>
+```
+
+Where `<aggregator-ip>` is the IP address of the host server, in the docker compose case above you should input
+the gateway to the docker local subnet (often in the form of `172.21.0.1`).
+
+## Build and running without Docker
+
+This project can also be packaged and run without using Docker.
+
+### Packaging the JAR
+To build the JAR without using the Docker image, run the following command from the root of the repository:
 
 ```shell
 ./mvnw clean package
 ```
 
-## Running
+### Running
 
 To run the JAR, run the following command from the root of the repository:
 
@@ -36,7 +69,23 @@ The CLI methods are documented in the form of usage messages, given using the `-
 java -jar target/pw-distributed-monitoring-1.0.0-SNAPSHOT.jar --help
 ```
 
-### Usage
+Giving
+  
+```shell
+Usage: DistributedMonitoring [-hVv] [COMMAND]
+Aggregate monitoring data from multiple sources.
+  -h, --help      Show this help message and exit.
+  -v              Change log verbosity. Use -vvv for maximum verbosity.
+  -V, --version   Print version information and exit.
+Commands:
+  help        Display help information about the specified command.
+  aggregator  Start an aggregator server to receive and store metrics
+  node        Start a node unit to send metrics
+  reader      Start a reader client to fetch metrics
+```
+
+### Commands
+
 * ```aggregator``` : Starts the aggregator
 ```text
 Usage: DistributedMonitoring aggregator [-hVv] [-i=<iface>] [-O=<metricsPort>]
@@ -88,24 +137,25 @@ Start a reader client to fetch metrics
 
 ```mermaid
 flowchart LR
-  P1C[PC1:CPU] --> C
-  P2C[PC2:CPU] --> C
-  P2M[PC2:RAM] --> C
-  P3D[PC3:DSK] --> C
-  C{Aggregator}
-  C <--> R1[Reader 1]
-  C <--> R2[Reader N]
-  style C stroke:orange 
+    P1C[PC1:CPU] --> C
+    P2C[PC2:CPU] --> C
+    P2M[PC2:RAM] --> C
+    P3D[PC3:DSK] --> C
+    C{Aggregator}
+    C <--> R1[Reader 1]
+    C <--> R2[Reader N]
+    style C stroke:orange 
 ```
 
 ## Protocol
 
 > [!NOTE]
-> The complete version of the protocol is available in [this document](./doc/protocol.pdf).
+> The complete version of the protocol is available in [multicast protocol](./doc/protocol-multicast.pdf)
+> and [unicast protocol](./doc/protocol-unicast.pdf).
 
 ### Node -> Aggregator
 
-For this part of our architecture, we have decided to use a UDP-type protocol using the fire-and-forget communication
+For this part of our architecture, we have decided to use a UDP-type protocol using the fire-and-forget communication 
 method. We chose to do multicast so that the aggregator can receive data from all the nodes at the same time.
 
 #### Multicast Addresses
@@ -120,24 +170,24 @@ We have decided to use the following multicast addresses for the different types
 * ```<type>{value=<value>, host=<host>}```
   * ```<type>``` : Type of the data sent (cpu, ram, dsk)
   * ```<value>``` : Value of the sent data
-    * cpu : CPU consumption in percentage
-    * ram : RAM consumption in MB
-    * dsk : Disk consumption in MB
+      * cpu : CPU consumption in percentage
+      * ram : RAM consumption in MB
+      * dsk : Disk consumption in MB
   * ```<host>``` : Name of the machine sending the data (hostname). Must be unique for each machine.
 
 #### Messages examples
 ```mermaid
 sequenceDiagram
-  participant Node_1 as Node_1
-  participant Aggregator as Aggregator
-  participant Node_2 as Node_2
-  par
+    participant Node_1 as Node_1
+    participant Aggregator as Aggregator
+    participant Node_2 as Node_2
+    par
     Node_1 ->> Aggregator: cpu{value=30.00, host=Node_1}
     Node_1 ->> Aggregator: ram{value=10000.00, host=Node_1}
-  end
-  par
+    end
+    par
     Node_2 ->> Aggregator : dsk{value=10000.00, host=Node_2}
-  end
+    end
 ```
 
 ### Reader <-> Aggregator
@@ -145,9 +195,15 @@ In this part of the architecture, we have decided to use a UDP-type protocol in 
 communication method. We chose to do unicast so that the reader can receive specific data from the aggregator.
 
 #### Data format
+
 ##### From reader to aggregator
 * ```GET_EMITTERS``` : Request to get the list of emitters
 * ```GET_EMITTER <emitter>``` : Request to get the values of a specific emitter
   * ```<emitter>``` : Hostname of the emitter to get the values from
 
+##### From aggregator to reader
 
+* ```ERROR 1``` : If the request could not be parsed by the aggregator
+* ```[<metric>: <value>, ...]``` : List of values for the requested emitter
+  * ```<metric>``` : Type of the data sent (CPU, RAM, DSK)
+  * ```<value>``` : Value of the sent data
