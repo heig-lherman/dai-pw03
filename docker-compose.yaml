@@ -5,6 +5,8 @@ services:
       - node
       - -m
       - CPU
+      - -H
+      - PC-1
   cpu-emitter-2:
     image: ghcr.io/heig-lherman/dai-pw03
     command:
@@ -12,19 +14,31 @@ services:
       - -m
       - CPU
       - -H
-      - cpu-emitter-2
+      - PC-2
   ram-emitter-1:
     image: ghcr.io/heig-lherman/dai-pw03
     command:
       - node
       - -m
       - RAM
-  dsk-emitter-2:
+      - -H
+      - PC-1
+  ram-emitter-2:
+    image: ghcr.io/heig-lherman/dai-pw03
+    command:
+      - node
+      - -m
+      - RAM
+      - -H
+      - PC-3
+  dsk-emitter-1:
     image: ghcr.io/heig-lherman/dai-pw03
     command:
       - node
       - -m
       - DSK
+      - -H
+      - PC-3
   aggregator:
     image: ghcr.io/heig-lherman/dai-pw03
     command:
@@ -35,4 +49,5 @@ services:
       - cpu-emitter-1
       - cpu-emitter-2
       - ram-emitter-1
-      - dsk-emitter-2
+      - ram-emitter-2
+      - dsk-emitter-1
