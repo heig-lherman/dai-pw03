@@ -67,6 +67,11 @@ public final class ReaderHandler implements Runnable {
         }
     }
 
+    /**
+     * Maps a list of metrics to a string. The format is: [metric1: value1, metric2: value2, ...]
+     * @param messages The list of metrics to map
+     * @return The mapped string
+     */
     private String mapMetrics(List<MetricMessage> messages) {
         return "[%s]".formatted(
                 messages.stream()
